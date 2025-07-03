@@ -28,6 +28,7 @@ if st.button("Hitung Kt/V"):
     else:
         st.warning("⚠ Kt/V masih di bawah target. Pertimbangkan tambah waktu atau Qb (jika aman).")
 
+st.markdown("""
 Note :  Catatan Perhitungan Kt/V Ideal Hemodialisis:
 
 - Kt/V adalah ukuran efektivitas dialisis, menunjukkan seberapa banyak racun dalam darah yang dibersihkan.
@@ -39,5 +40,5 @@ Note :  Catatan Perhitungan Kt/V Ideal Hemodialisis:
   - Durasi dalam menit (jam × 60)  
   - Volume Distribusi ≈ 0.55 × Berat Badan Kering (kg) × 1000 (mL)  
 - Jika Kt/V < 1.7, pertimbangkan menambah durasi dialisis atau meningkatkan Qb bila aman.  
-- Jangan lupa evaluasi kondisi pasien, jangan memaksakan parameter tanpa pengawasan medis.  
-
+- Jangan lupa evaluasi kondisi pasien, jangan memaksakan parameter tanpa pengawasan medis.   
+""")
