@@ -22,8 +22,8 @@ bb_kering = st.number_input("⚖ Berat Badan Kering (kg)", min_value=20.0, max_v
 
 if st.button("Hitung Kt/V"):
     ktv = hitung_ktv(qb, durasi_jam, bb_kering)
-        st.success(f"Perkiraan Kt/V Anda: {ktv}")
-        if ktv >= 1.7:
-            st.info("✅ Target Kt/V tercapai. Proses dialisis sudah efektif.")
-        else:
-            st.warning("⚠ Kt/V masih di bawah target. Pertimbangkan tambah waktu atau Qb (jika aman).")
+    st.success(f"Perkiraan Kt/V Anda: {ktv}")
+    if ktv >= 1.7:
+        st.info("✅ Target Kt/V tercapai. Proses dialisis sudah efektif.")
+    else:
+        st.warning("⚠ Kt/V masih di bawah target. Pertimbangkan tambah waktu atau Qb (jika aman).")
