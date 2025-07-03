@@ -9,7 +9,7 @@ def hitung_ktv(qb, durasi_jam, bb_kering):
 
 st.set_page_config(page_title="Kalkulator Kt/V HD", layout="centered")
 
-st.title("🔢 Kalkulator Sederhana Kt/V untuk Hemodialisis")
+st.title("🔢 Kalkulator Kasar Sederhana Kt/V untuk Hemodialisis")
 st.markdown("""
 Apa itu Kt/V?  
 Kt/V menunjukkan seberapa efektif racun dalam darah dibersihkan selama cuci darah (HD).  
