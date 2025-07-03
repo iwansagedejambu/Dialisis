@@ -27,4 +27,4 @@ if st.button("Hitung Kt/V"):
     if ktv >= 1.7:
         st.info("✅ Target Kt/V tercapai. Proses dialisis sudah efektif.")
     else:
-    st.warning("⚠ Kt/V masih di bawah target. Pertimbangkan tambah waktu atau Qb (jika aman).")
+        st.warning("⚠ Kt/V masih di bawah target. Pertimbangkan tambah waktu atau Qb (jika aman).")
