@@ -22,8 +22,8 @@ durasi_jam = st.number_input("⏱ Durasi Dialisis (jam)", min_value=1.0, max_val
 bb_kering = st.number_input("⚖ Berat Badan Kering (kg)", min_value=20.0, max_value=120.0, value=48.5)
 
 if st.button("Hitung Kt/V"):
-    ktv = hitung_ktv(qb, durasi_jam, bb_kering)
-    st.success(f"Perkiraan Kt/V Anda: {ktv}")
+    ktv = hitung_ktv(qb, durasi_jam, bb_kering)
+        st.success(f"Perkiraan Kt/V Anda: {ktv}")
     if ktv >= 1.7:
         st.info("✅ Target Kt/V tercapai. Proses dialisis sudah efektif.")
     else:
