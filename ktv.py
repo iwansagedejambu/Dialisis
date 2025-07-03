@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 
 def hitung_ktv(qb, durasi_jam, bb_kering):
