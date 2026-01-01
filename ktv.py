@@ -2,31 +2,6 @@ import streamlit as st
 import math
 
 # =========================
-# Fungsi Kt/V Daugirdas II
-# =========================
-def hitung_ktv_daugirdas2(
-    bun_pre,       # mg/dL
-    bun_post,      # mg/dL
-    durasi_jam,    # jam
-    uf_liter,      # liter
-    bb_post        # kg
-):
-    if bun_pre <= 0 or bun_post <= 0 or bb_post <= 0:
-        return 0
-
-    R = bun_post / bun_pre
-    t = durasi_jam
-    UF = uf_liter
-    W = bb_post
-
-    try:
-        ktv = -math.log(R - 0.008 * t) + (4 - 3.5 * R) * (UF / W)
-        return round(ktv, 2)
-    except ValueError:
-        return 0
-
-
-# =========================
 # Konfigurasi halaman
 # =========================
 st.set_page_config(
@@ -35,11 +10,44 @@ st.set_page_config(
 )
 
 # =========================
+# Fungsi Kt/V Daugirdas II (AMAN)
+# =========================
+def hitung_ktv_daugirdas2(
+    bun_pre,       # mg/dL
+    bun_post,      # mg/dL
+    durasi_jam,    # jam
+    uf_liter,      # liter
+    bb_post        # kg
+):
+    # Validasi dasar
+    if bun_pre <= 0 or bun_post <= 0 or bb_post <= 0:
+        return None, "Input tidak valid."
+
+    R = bun_post / bun_pre
+    t = durasi_jam
+    UF = uf_liter
+    W = bb_post
+
+    nilai_log = R - 0.008 * t
+
+    # Validasi matematis WAJIB
+    if nilai_log <= 0:
+        return None, (
+            "Perhitungan tidak valid:\n"
+            "R − 0.008 × t ≤ 0.\n\n"
+            "Periksa kembali nilai BUN dan durasi dialisis."
+        )
+
+    ktv = -math.log(nilai_log) + (4 - 3.5 * R) * (UF / W)
+    return round(ktv, 2), None
+
+
+# =========================
 # Judul & deskripsi
 # =========================
 st.title("💉 Kalkulator Kt/V Hemodialisis (Daugirdas II)")
 st.markdown("""
-Kt/V adalah parameter untuk menilai **kecukupan hemodialisis (HD)**.  
+Kt/V digunakan untuk menilai **kecukupan hemodialisis (HD)**.  
 Aplikasi ini menggunakan **rumus Daugirdas II**, yang merupakan **standar klinis internasional**.
 
 🎯 **Target Kt/V ≥ 1.7**
@@ -57,14 +65,16 @@ with col1:
         "🧪 BUN Pre Dialisis (mg/dL)",
         min_value=10.0,
         max_value=200.0,
-        value=70.0
+        value=70.0,
+        step=1.0
     )
 
     bun_post = st.number_input(
         "🧪 BUN Post Dialisis (mg/dL)",
         min_value=2.0,
         max_value=100.0,
-        value=15.0
+        value=15.0,
+        step=1.0
     )
 
     durasi_jam = st.number_input(
@@ -96,13 +106,17 @@ with col2:
 # Tombol hitung
 # =========================
 if st.button("🔍 Hitung Kt/V"):
-    ktv = hitung_ktv_daugirdas2(
+    ktv, error_msg = hitung_ktv_daugirdas2(
         bun_pre=bun_pre,
         bun_post=bun_post,
         durasi_jam=durasi_jam,
         uf_liter=uf_liter,
         bb_post=bb_post
     )
+
+    if error_msg:
+        st.error(error_msg)
+        st.stop()
 
     st.subheader(f"Hasil Kt/V Anda: **{ktv}**")
 
@@ -120,7 +134,7 @@ with st.expander("📌 Penjelasan Rumus Daugirdas II"):
     st.markdown("""
 **Rumus Daugirdas II (single-pool Kt/V):**
 
-> Kt/V = −ln(R − 0.008 × t) + (4 − 3.5 × R) × (UF / W)
+> **Kt/V = −ln(R − 0.008 × t) + (4 − 3.5 × R) × (UF / W)**
 
 **Keterangan:**
 - **R** = BUN post / BUN pre  
@@ -128,12 +142,12 @@ with st.expander("📌 Penjelasan Rumus Daugirdas II"):
 - **UF** = ultrafiltrasi (liter)  
 - **W** = berat badan post dialisis (kg)
 
-📌 Rumus ini **lebih akurat** dibanding pendekatan berbasis Qb karena:
+📌 Rumus ini:
 - Memperhitungkan **urea rebound**
 - Memasukkan efek **ultrafiltrasi**
-- Digunakan secara luas di praktik klinis
+- Digunakan luas dalam praktik klinis HD
 """)
 
 st.caption(
-    "🧠 Alat bantu edukasi. Hasil tidak menggantikan evaluasi medis oleh dokter atau unit HD."
+    "🧠 Alat bantu edukasi. Tidak menggantikan evaluasi medis oleh dokter atau unit hemodialisis."
 )
