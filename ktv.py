@@ -1,62 +1,139 @@
 import streamlit as st
+import math
 
-# Fungsi untuk menghitung Kt/V
-def hitung_ktv(qb, durasi_jam, bb_kering):
-    clearance = 0.7 * qb  # mL/menit
-    waktu_menit = durasi_jam * 60
-    v = 0.55 * bb_kering * 1000  # Volume distribusi dalam mL
-    ktv = (clearance * waktu_menit) / v
-    return round(ktv, 2)
+# =========================
+# Fungsi Kt/V Daugirdas II
+# =========================
+def hitung_ktv_daugirdas2(
+    bun_pre,       # mg/dL
+    bun_post,      # mg/dL
+    durasi_jam,    # jam
+    uf_liter,      # liter
+    bb_post        # kg
+):
+    if bun_pre <= 0 or bun_post <= 0 or bb_post <= 0:
+        return 0
 
-# Konfigurasi halaman Streamlit
-st.set_page_config(page_title="Kalkulator Kt/V Hemodialisis", layout="centered")
+    R = bun_post / bun_pre
+    t = durasi_jam
+    UF = uf_liter
+    W = bb_post
 
-# Judul dan deskripsi
-st.title("💉 Kalkulator Kt/V Sederhana untuk Hemodialisis")
+    try:
+        ktv = -math.log(R - 0.008 * t) + (4 - 3.5 * R) * (UF / W)
+        return round(ktv, 2)
+    except ValueError:
+        return 0
+
+
+# =========================
+# Konfigurasi halaman
+# =========================
+st.set_page_config(
+    page_title="Kalkulator Kt/V Hemodialisis (Daugirdas II)",
+    layout="centered"
+)
+
+# =========================
+# Judul & deskripsi
+# =========================
+st.title("💉 Kalkulator Kt/V Hemodialisis (Daugirdas II)")
 st.markdown("""
-Kt/V adalah parameter yang digunakan untuk menilai **efektivitas proses hemodialisis (HD)**.  
-Semakin tinggi nilainya, semakin banyak racun dalam darah yang berhasil disaring.  
-**Target Kt/V ≥ 1.7** menandakan dialisis yang memadai.
+Kt/V adalah parameter untuk menilai **kecukupan hemodialisis (HD)**.  
+Aplikasi ini menggunakan **rumus Daugirdas II**, yang merupakan **standar klinis internasional**.
+
+🎯 **Target Kt/V ≥ 1.7**
 """)
 
+# =========================
 # Input pengguna
-st.header("📥 Masukkan Parameter Dialisis Anda")
+# =========================
+st.header("📥 Masukkan Parameter Dialisis")
+
 col1, col2 = st.columns(2)
+
 with col1:
-    qb = st.number_input("🔄 Laju Aliran Darah (Qb) - mL/menit", min_value=100, max_value=500, value=220)
-    bb_kering = st.number_input("⚖️ Berat Badan Kering (kg)", min_value=20.0, max_value=150.0, value=48.5)
+    bun_pre = st.number_input(
+        "🧪 BUN Pre Dialisis (mg/dL)",
+        min_value=10.0,
+        max_value=200.0,
+        value=70.0
+    )
+
+    bun_post = st.number_input(
+        "🧪 BUN Post Dialisis (mg/dL)",
+        min_value=2.0,
+        max_value=100.0,
+        value=15.0
+    )
+
+    durasi_jam = st.number_input(
+        "⏱️ Durasi Dialisis (jam)",
+        min_value=1.0,
+        max_value=6.0,
+        value=4.0,
+        step=0.25
+    )
+
 with col2:
-    durasi_jam = st.number_input("⏱️ Durasi Dialisis (jam)", min_value=1.0, max_value=6.0, value=4.0)
+    uf_liter = st.number_input(
+        "💧 Ultrafiltrasi (liter)",
+        min_value=0.0,
+        max_value=5.0,
+        value=2.5,
+        step=0.1
+    )
 
-# Tombol untuk menghitung
-if st.button("🔍 Hitung Kt/V Sekarang"):
-    ktv = hitung_ktv(qb, durasi_jam, bb_kering)
-    st.subheader(f"Hasil Perhitungan Kt/V Anda: **{ktv}**")
-    
-    # Interpretasi hasil
+    bb_post = st.number_input(
+        "⚖️ Berat Badan Post Dialisis (kg)",
+        min_value=20.0,
+        max_value=150.0,
+        value=60.0,
+        step=0.5
+    )
+
+# =========================
+# Tombol hitung
+# =========================
+if st.button("🔍 Hitung Kt/V"):
+    ktv = hitung_ktv_daugirdas2(
+        bun_pre=bun_pre,
+        bun_post=bun_post,
+        durasi_jam=durasi_jam,
+        uf_liter=uf_liter,
+        bb_post=bb_post
+    )
+
+    st.subheader(f"Hasil Kt/V Anda: **{ktv}**")
+
     if ktv >= 1.7:
-        st.success("✅ Kt/V tercapai. Proses dialisis sudah cukup efektif.")
+        st.success("✅ Kt/V tercapai. Dialisis adekuat.")
     elif 1.4 <= ktv < 1.7:
-        st.warning("⚠ Kt/V mendekati target, namun masih perlu dievaluasi lebih lanjut.")
+        st.warning("⚠ Kt/V borderline. Perlu evaluasi durasi, UF, atau akses vaskular.")
     else:
-        st.error("❌ Kt/V di bawah target. Pertimbangkan menambah waktu dialisis atau Qb jika memungkinkan.")
+        st.error("❌ Kt/V tidak adekuat. Risiko underdialysis.")
 
-# Catatan perhitungan
-with st.expander("📌 Penjelasan dan Rumus yang Digunakan"):
+# =========================
+# Penjelasan rumus
+# =========================
+with st.expander("📌 Penjelasan Rumus Daugirdas II"):
     st.markdown("""
-    **Rumus Perhitungan Sederhana Kt/V:**
+**Rumus Daugirdas II (single-pool Kt/V):**
 
-    \n> Kt/V = (Clearance × Waktu) / Volume Distribusi
-    
-    **Dengan asumsi:**
-    - Clearance = 0.7 × Qb (mL/menit)
-    - Waktu = Durasi dialisis (jam) × 60 (menit)
-    - Volume distribusi = 0.55 × Berat Badan Kering (kg) × 1000 (mL)
+> Kt/V = −ln(R − 0.008 × t) + (4 − 3.5 × R) × (UF / W)
 
-    **Keterangan:**
-    - Nilai Kt/V ≥ 1.7 menunjukkan proses dialisis cukup optimal.
-    - Nilai < 1.7 bisa berarti waktu atau aliran darah kurang — konsultasikan ke dokter.
-    - Perhitungan ini adalah pendekatan kasar, **tidak menggantikan evaluasi medis** dari lab dan dokter.
-    """)
+**Keterangan:**
+- **R** = BUN post / BUN pre  
+- **t** = durasi dialisis (jam)  
+- **UF** = ultrafiltrasi (liter)  
+- **W** = berat badan post dialisis (kg)
 
-st.caption("🧠 Kalkulator ini hanya alat bantu. Konsultasikan hasilnya dengan tim medis Anda.")
+📌 Rumus ini **lebih akurat** dibanding pendekatan berbasis Qb karena:
+- Memperhitungkan **urea rebound**
+- Memasukkan efek **ultrafiltrasi**
+- Digunakan secara luas di praktik klinis
+""")
+
+st.caption(
+    "🧠 Alat bantu edukasi. Hasil tidak menggantikan evaluasi medis oleh dokter atau unit HD."
+)
